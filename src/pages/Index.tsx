@@ -119,36 +119,35 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-gray-200/50 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
                 src="/lovable-uploads/8960b70e-ca17-4aae-85a4-23f5e6751b1c.png" 
                 alt="Apple" 
-                className="h-8 w-auto"
+                className="h-7 w-auto"
               />
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">RAG Assistant</h1>
-                <p className="text-sm text-gray-500">Intelligent Knowledge Retrieval</p>
+                <h1 className="text-lg font-medium text-black">Assistant</h1>
               </div>
             </div>
             
             {/* Controls */}
             <div className="flex items-center space-x-4">
               {/* Conversation Style */}
-              <div className="flex bg-gray-100 rounded-xl p-1">
+              <div className="flex bg-gray-100 rounded-lg p-1">
                 {conversationStyles.map((style) => (
                   <button
                     key={style.id}
                     onClick={() => setConversationStyle(style.id as any)}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300",
+                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
                       conversationStyle === style.id
-                        ? "bg-white text-blue-600 shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? "bg-black text-white shadow-sm"
+                        : "text-gray-600 hover:text-black"
                     )}
                   >
                     <style.icon size={16} />
@@ -158,16 +157,16 @@ const Index = () => {
               </div>
 
               {/* Search Type */}
-              <div className="flex bg-gray-100 rounded-xl p-1">
+              <div className="flex bg-gray-100 rounded-lg p-1">
                 {searchTypes.map((type) => (
                   <button
                     key={type.id}
                     onClick={() => setSearchType(type.id as any)}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300",
+                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
                       searchType === type.id
-                        ? "bg-white text-blue-600 shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? "bg-black text-white shadow-sm"
+                        : "text-gray-600 hover:text-black"
                     )}
                   >
                     <type.icon size={16} />
@@ -185,10 +184,10 @@ const Index = () => {
         <div className="space-y-6">
           {messages.length === 0 && (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl mx-auto mb-6 flex items-center justify-center transform rotate-3">
+              <div className="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center transform rotate-3">
                 <Search className="text-white" size={32} />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to RAG Assistant</h2>
+              <h2 className="text-2xl font-medium text-black mb-2">Welcome to Assistant</h2>
               <p className="text-gray-600 mb-8">Ask me anything about our documentation, guidelines, and technical resources.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
@@ -200,7 +199,7 @@ const Index = () => {
                 ].map((suggestion, index) => (
                   <Card 
                     key={index}
-                    className="cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                    className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-gray-200"
                     onClick={() => setInputValue(suggestion)}
                   >
                     <CardContent className="p-4">
@@ -224,8 +223,8 @@ const Index = () => {
                 className={cn(
                   "max-w-3xl rounded-2xl px-6 py-4 shadow-sm",
                   message.type === 'user'
-                    ? "bg-blue-600 text-white"
-                    : "bg-white border border-gray-200"
+                    ? "bg-black text-white"
+                    : "bg-gray-50 border border-gray-200"
                 )}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
@@ -240,14 +239,14 @@ const Index = () => {
                     {message.sources.map((source) => (
                       <Card 
                         key={source.id}
-                        className="border border-gray-200 hover:border-blue-300 transition-all duration-300"
+                        className="border border-gray-200 hover:border-gray-400 transition-all duration-300"
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
-                                <h4 className="font-medium text-gray-900 text-sm">{source.title}</h4>
-                                <Badge variant="secondary" className="text-xs">
+                                <h4 className="font-medium text-black text-sm">{source.title}</h4>
+                                <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-700">
                                   {Math.round(source.relevance * 100)}% match
                                 </Badge>
                               </div>
@@ -264,7 +263,7 @@ const Index = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                    className="text-black border-gray-300 hover:bg-gray-100"
                                     onClick={() => window.open(source.url, '_blank')}
                                   >
                                     <ExternalLink size={14} className="mr-2" />
@@ -300,7 +299,7 @@ const Index = () => {
 
           {isLoading && (
             <div className="flex justify-start animate-fade-in">
-              <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
                 <div className="flex items-center space-x-3">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -319,7 +318,7 @@ const Index = () => {
         {/* Input Form */}
         <div className="sticky bottom-6 mt-8">
           <form onSubmit={handleSubmit} className="relative">
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
+            <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -330,7 +329,7 @@ const Index = () => {
               <Button
                 type="submit"
                 disabled={!inputValue.trim() || isLoading}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-105"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black hover:bg-gray-800 text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-105"
                 size="sm"
               >
                 <Send size={16} />
