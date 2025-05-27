@@ -80,50 +80,52 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId }: ChatSide
         </Button>
       </SidebarHeader>
       
-      <SidebarContent className="p-2">
+      <SidebarContent className="p-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-600 text-xs font-medium mb-2 px-2">
+          <SidebarGroupLabel className="text-gray-600 text-xs font-medium mb-4 px-2 flex items-center">
             <History size={14} className="mr-2" />
             Recent Chats
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-3">
               {chatSessions.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
-                  <SidebarMenuButton
-                    onClick={() => onSelectChat(chat.id)}
-                    className={`w-full p-3 rounded-lg transition-all duration-300 hover:bg-gray-100 group ${
-                      currentChatId === chat.id ? 'bg-gray-100' : ''
+                  <div
+                    className={`relative p-4 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
+                      currentChatId === chat.id 
+                        ? 'bg-gray-50 border-gray-300' 
+                        : 'bg-white border-gray-200 hover:bg-gray-50'
                     }`}
+                    onClick={() => onSelectChat(chat.id)}
                   >
-                    <div className="flex items-start space-x-3 w-full">
-                      <MessageSquare size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="text-sm font-medium text-black truncate">
+                    <div className="flex items-start space-x-3">
+                      <MessageSquare size={16} className="text-gray-500 mt-1 flex-shrink-0" />
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium text-black truncate pr-2">
                             {chat.title}
                           </h4>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 flex-shrink-0">
                             {formatTime(chat.timestamp)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-600 truncate">
+                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
                           {chat.lastMessage}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto hover:bg-gray-200"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Handle delete
-                        }}
-                      >
-                        <Trash2 size={12} className="text-gray-500" />
-                      </Button>
                     </div>
-                  </SidebarMenuButton>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 h-auto hover:bg-gray-200 rounded-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle delete
+                      }}
+                    >
+                      <Trash2 size={14} className="text-gray-500" />
+                    </Button>
+                  </div>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
