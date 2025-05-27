@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Send, ChevronDown, ExternalLink, Search, Lightbulb, Target, Database, Brain } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { ChatSidebar } from "@/components/ChatSidebar";
 
 interface Message {
   id: string;
@@ -31,6 +32,7 @@ const Index = () => {
   const [conversationStyle, setConversationStyle] = useState<'creative' | 'balanced' | 'precise'>('balanced');
   const [searchType, setSearchType] = useState<'deep' | 'external'>('deep');
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
+  const [currentChatId, setCurrentChatId] = useState<string>('1');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -107,6 +109,17 @@ const Index = () => {
     });
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setCurrentChatId(Date.now().toString());
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    // In a real app, you'd load the messages for this chat
+    setMessages([]);
+  };
+
   const conversationStyles = [
     { id: 'creative', label: 'Creative', icon: Lightbulb, description: 'Imaginative responses' },
     { id: 'balanced', label: 'Balanced', icon: Target, description: 'Balanced approach' },
@@ -119,232 +132,243 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img 
-                src="/lovable-uploads/8960b70e-ca17-4aae-85a4-23f5e6751b1c.png" 
-                alt="Apple" 
-                className="h-7 w-auto"
-              />
-              <div>
-                <h1 className="text-lg font-medium text-black">Assistant</h1>
-              </div>
-            </div>
-            
-            {/* Controls */}
-            <div className="flex items-center space-x-4">
-              {/* Conversation Style */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                {conversationStyles.map((style) => (
-                  <button
-                    key={style.id}
-                    onClick={() => setConversationStyle(style.id as any)}
-                    className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
-                      conversationStyle === style.id
-                        ? "bg-black text-white shadow-sm"
-                        : "text-gray-600 hover:text-black"
-                    )}
-                  >
-                    <style.icon size={16} />
-                    <span>{style.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Search Type */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                {searchTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setSearchType(type.id as any)}
-                    className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
-                      searchType === type.id
-                        ? "bg-black text-white shadow-sm"
-                        : "text-gray-600 hover:text-black"
-                    )}
-                  >
-                    <type.icon size={16} />
-                    <span>{type.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Chat Container */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="space-y-6">
-          {messages.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center transform rotate-3">
-                <Search className="text-white" size={32} />
-              </div>
-              <h2 className="text-2xl font-medium text-black mb-2">Welcome to Assistant</h2>
-              <p className="text-gray-600 mb-8">Ask me anything about our documentation, guidelines, and technical resources.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                {[
-                  "What is Section 2 about?",
-                  "Show me implementation guidelines",
-                  "Security standards overview", 
-                  "Latest technical updates"
-                ].map((suggestion, index) => (
-                  <Card 
-                    key={index}
-                    className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-gray-200"
-                    onClick={() => setInputValue(suggestion)}
-                  >
-                    <CardContent className="p-4">
-                      <p className="text-gray-700 text-sm">{suggestion}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                "flex animate-fade-in",
-                message.type === 'user' ? "justify-end" : "justify-start"
-              )}
-            >
-              <div
-                className={cn(
-                  "max-w-3xl rounded-2xl px-6 py-4 shadow-sm",
-                  message.type === 'user'
-                    ? "bg-black text-white"
-                    : "bg-gray-50 border border-gray-200"
-                )}
-              >
-                <p className="text-sm leading-relaxed">{message.content}</p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-white">
+        <ChatSidebar 
+          onNewChat={handleNewChat}
+          onSelectChat={handleSelectChat}
+          currentChatId={currentChatId}
+        />
+        
+        <SidebarInset className="flex-1">
+          {/* Header */}
+          <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
+            <div className="max-w-4xl mx-auto px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <SidebarTrigger className="hover:bg-gray-100" />
+                  <img 
+                    src="/lovable-uploads/8960b70e-ca17-4aae-85a4-23f5e6751b1c.png" 
+                    alt="Apple" 
+                    className="h-7 w-auto"
+                  />
+                  <div>
+                    <h1 className="text-lg font-medium text-black">Assistant</h1>
+                  </div>
+                </div>
                 
-                {message.sources && (
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <ExternalLink size={16} />
-                      <span className="text-sm font-medium">Sources ({message.sources.length})</span>
-                    </div>
-                    
-                    {message.sources.map((source) => (
+                {/* Controls */}
+                <div className="flex items-center space-x-4">
+                  {/* Conversation Style */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    {conversationStyles.map((style) => (
+                      <button
+                        key={style.id}
+                        onClick={() => setConversationStyle(style.id as any)}
+                        className={cn(
+                          "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                          conversationStyle === style.id
+                            ? "bg-black text-white shadow-sm"
+                            : "text-gray-600 hover:text-black"
+                        )}
+                      >
+                        <style.icon size={16} />
+                        <span>{style.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Type */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    {searchTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() => setSearchType(type.id as any)}
+                        className={cn(
+                          "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                          searchType === type.id
+                            ? "bg-black text-white shadow-sm"
+                            : "text-gray-600 hover:text-black"
+                        )}
+                      >
+                        <type.icon size={16} />
+                        <span>{type.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Chat Container */}
+          <div className="max-w-4xl mx-auto px-6 py-8">
+            <div className="space-y-6">
+              {messages.length === 0 && (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center transform rotate-3">
+                    <Search className="text-white" size={32} />
+                  </div>
+                  <h2 className="text-2xl font-medium text-black mb-2">Welcome to Assistant</h2>
+                  <p className="text-gray-600 mb-8">Ask me anything about our documentation, guidelines, and technical resources.</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                    {[
+                      "What is Section 2 about?",
+                      "Show me implementation guidelines",
+                      "Security standards overview", 
+                      "Latest technical updates"
+                    ].map((suggestion, index) => (
                       <Card 
-                        key={source.id}
-                        className="border border-gray-200 hover:border-gray-400 transition-all duration-300"
+                        key={index}
+                        className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-gray-200"
+                        onClick={() => setInputValue(suggestion)}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <h4 className="font-medium text-black text-sm">{source.title}</h4>
-                                <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-700">
-                                  {Math.round(source.relevance * 100)}% match
-                                </Badge>
-                              </div>
-                              
-                              <p className="text-sm text-gray-600 mb-3">{source.snippet}</p>
-                              
-                              {expandedSources.has(source.id) && (
-                                <div className="animate-fade-in border-t pt-3 mt-3">
-                                  <p className="text-sm text-gray-700 mb-3">
-                                    This source provides comprehensive documentation about the architectural patterns 
-                                    and implementation guidelines. It includes code examples, best practices, and 
-                                    detailed explanations of the concepts mentioned in your query.
-                                  </p>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-black border-gray-300 hover:bg-gray-100"
-                                    onClick={() => window.open(source.url, '_blank')}
-                                  >
-                                    <ExternalLink size={14} className="mr-2" />
-                                    View Full Document
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleSourceExpansion(source.id)}
-                              className="ml-2 text-gray-400 hover:text-gray-600"
-                            >
-                              <ChevronDown 
-                                size={16} 
-                                className={cn(
-                                  "transition-transform duration-300",
-                                  expandedSources.has(source.id) && "rotate-180"
-                                )}
-                              />
-                            </Button>
-                          </div>
+                          <p className="text-gray-700 text-sm">{suggestion}</p>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="flex justify-start animate-fade-in">
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                  <span className="text-sm text-gray-600">Searching knowledge base...</span>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          <div ref={messagesEndRef} />
-        </div>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    "flex animate-fade-in",
+                    message.type === 'user' ? "justify-end" : "justify-start"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "max-w-3xl rounded-2xl px-6 py-4 shadow-sm",
+                      message.type === 'user'
+                        ? "bg-black text-white"
+                        : "bg-gray-50 border border-gray-200"
+                    )}
+                  >
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    
+                    {message.sources && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <ExternalLink size={16} />
+                          <span className="text-sm font-medium">Sources ({message.sources.length})</span>
+                        </div>
+                        
+                        {message.sources.map((source) => (
+                          <Card 
+                            key={source.id}
+                            className="border border-gray-200 hover:border-gray-400 transition-all duration-300"
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <h4 className="font-medium text-black text-sm">{source.title}</h4>
+                                    <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-700">
+                                      {Math.round(source.relevance * 100)}% match
+                                    </Badge>
+                                  </div>
+                                  
+                                  <p className="text-sm text-gray-600 mb-3">{source.snippet}</p>
+                                  
+                                  {expandedSources.has(source.id) && (
+                                    <div className="animate-fade-in border-t pt-3 mt-3">
+                                      <p className="text-sm text-gray-700 mb-3">
+                                        This source provides comprehensive documentation about the architectural patterns 
+                                        and implementation guidelines. It includes code examples, best practices, and 
+                                        detailed explanations of the concepts mentioned in your query.
+                                      </p>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-black border-gray-300 hover:bg-gray-100"
+                                        onClick={() => window.open(source.url, '_blank')}
+                                      >
+                                        <ExternalLink size={14} className="mr-2" />
+                                        View Full Document
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleSourceExpansion(source.id)}
+                                  className="ml-2 text-gray-400 hover:text-gray-600"
+                                >
+                                  <ChevronDown 
+                                    size={16} 
+                                    className={cn(
+                                      "transition-transform duration-300",
+                                      expandedSources.has(source.id) && "rotate-180"
+                                    )}
+                                  />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
 
-        {/* Input Form */}
-        <div className="sticky bottom-6 mt-8">
-          <form onSubmit={handleSubmit} className="relative">
-            <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask me anything about Apple documentation..."
-                className="border-0 text-base py-6 px-6 focus-visible:ring-0 focus-visible:ring-offset-0"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                disabled={!inputValue.trim() || isLoading}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black hover:bg-gray-800 text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-105"
-                size="sm"
-              >
-                <Send size={16} />
-              </Button>
+              {isLoading && (
+                <div className="flex justify-start animate-fade-in">
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">Searching knowledge base...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
             </div>
-            
-            <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-gray-500">
-              <span>Mode: {conversationStyle}</span>
-              <span>•</span>
-              <span>Search: {searchType === 'deep' ? 'Deep Research' : 'External Database'}</span>
+
+            {/* Input Form */}
+            <div className="sticky bottom-6 mt-8">
+              <form onSubmit={handleSubmit} className="relative">
+                <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
+                  <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Ask me anything about Apple documentation..."
+                    className="border-0 text-base py-6 px-6 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!inputValue.trim() || isLoading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black hover:bg-gray-800 text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-105"
+                    size="sm"
+                  >
+                    <Send size={16} />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-gray-500">
+                  <span>Mode: {conversationStyle}</span>
+                  <span>•</span>
+                  <span>Search: {searchType === 'deep' ? 'Deep Research' : 'External Database'}</span>
+                </div>
+              </form>
             </div>
-          </form>
-        </div>
+          </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
