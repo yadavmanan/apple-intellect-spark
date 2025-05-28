@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -9,10 +9,17 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarGroupContent
+  SidebarGroupContent,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
-import { MessageSquare, History, Plus, Trash2 } from 'lucide-react';
+import { MessageSquare, History, Plus, MoreHorizontal } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatSession {
   id: string;
@@ -25,37 +32,11 @@ interface ChatSidebarProps {
   onNewChat: () => void;
   onSelectChat: (chatId: string) => void;
   currentChatId?: string;
+  chatSessions: ChatSession[];
+  onDeleteChat: (chatId: string) => void;
 }
 
-export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId }: ChatSidebarProps) => {
-  // Mock chat history data
-  const chatSessions: ChatSession[] = [
-    {
-      id: '1',
-      title: 'What is Section 2?',
-      lastMessage: 'Section 2 refers to the fundamental architecture patterns...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
-    },
-    {
-      id: '2', 
-      title: 'iOS Development Guidelines',
-      lastMessage: 'The iOS Human Interface Guidelines provide...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2 hours ago
-    },
-    {
-      id: '3',
-      title: 'SwiftUI Best Practices',
-      lastMessage: 'SwiftUI provides a declarative Swift syntax...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
-    },
-    {
-      id: '4',
-      title: 'Security Standards',
-      lastMessage: 'Apple\'s security framework ensures...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48) // 2 days ago
-    }
-  ];
-
+export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId, chatSessions, onDeleteChat }: ChatSidebarProps) => {
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -71,6 +52,9 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId }: ChatSide
   return (
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className="border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <SidebarTrigger className="hover:bg-gray-100" />
+        </div>
         <Button 
           onClick={onNewChat}
           className="w-full bg-black hover:bg-gray-800 text-white rounded-xl transition-all duration-300 hover:scale-105"
@@ -114,17 +98,31 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId }: ChatSide
                         </p>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 h-auto hover:bg-gray-200 rounded-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle delete
-                      }}
-                    >
-                      <Trash2 size={14} className="text-gray-500" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 h-auto hover:bg-gray-200 rounded-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <MoreHorizontal size={14} className="text-gray-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteChat(chat.id);
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          Delete chat
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </SidebarMenuItem>
               ))}

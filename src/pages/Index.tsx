@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, ChevronDown, ExternalLink, Search, Lightbulb, Target, Database, Brain } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { ChatSidebar } from "@/components/ChatSidebar";
 
 interface Message {
@@ -26,6 +25,13 @@ interface Source {
   relevance: number;
 }
 
+interface ChatSession {
+  id: string;
+  title: string;
+  lastMessage: string;
+  timestamp: Date;
+}
+
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -34,6 +40,32 @@ const Index = () => {
   const [searchType, setSearchType] = useState<'deep' | 'external'>('deep');
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
   const [currentChatId, setCurrentChatId] = useState<string>('1');
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([
+    {
+      id: '1',
+      title: 'What is Section 2?',
+      lastMessage: 'Section 2 refers to the fundamental architecture patterns...',
+      timestamp: new Date(Date.now() - 1000 * 60 * 30)
+    },
+    {
+      id: '2', 
+      title: 'iOS Development Guidelines',
+      lastMessage: 'The iOS Human Interface Guidelines provide...',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
+    },
+    {
+      id: '3',
+      title: 'SwiftUI Best Practices',
+      lastMessage: 'SwiftUI provides a declarative Swift syntax...',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
+    },
+    {
+      id: '4',
+      title: 'Security Standards',
+      lastMessage: 'Apple\'s security framework ensures...',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48)
+    }
+  ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -80,6 +112,20 @@ const Index = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    
+    // If this is the first message in a new chat, create a new chat session
+    if (messages.length === 0) {
+      const newChatId = Date.now().toString();
+      const newChatSession: ChatSession = {
+        id: newChatId,
+        title: inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue,
+        lastMessage: inputValue,
+        timestamp: new Date()
+      };
+      setChatSessions(prev => [newChatSession, ...prev]);
+      setCurrentChatId(newChatId);
+    }
+    
     setInputValue('');
     setIsLoading(true);
 
@@ -112,13 +158,21 @@ const Index = () => {
 
   const handleNewChat = () => {
     setMessages([]);
-    setCurrentChatId(Date.now().toString());
+    setCurrentChatId('');
   };
 
   const handleSelectChat = (chatId: string) => {
     setCurrentChatId(chatId);
     // In a real app, you'd load the messages for this chat
     setMessages([]);
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    setChatSessions(prev => prev.filter(session => session.id !== chatId));
+    if (currentChatId === chatId) {
+      setCurrentChatId('');
+      setMessages([]);
+    }
   };
 
   const conversationStyles = [
@@ -139,6 +193,8 @@ const Index = () => {
           onNewChat={handleNewChat}
           onSelectChat={handleSelectChat}
           currentChatId={currentChatId}
+          chatSessions={chatSessions}
+          onDeleteChat={handleDeleteChat}
         />
         
         <SidebarInset className="flex-1">
@@ -146,12 +202,11 @@ const Index = () => {
           <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
             <div className="max-w-4xl mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <SidebarTrigger className="hover:bg-gray-100" />
+                <div className="flex items-center space-x-8">
                   <img 
                     src="/lovable-uploads/logonew.png" 
-                    alt="Siemens Healthineers" 
-                    className="h-12 w-auto"
+                    alt="Logo" 
+                    className="h-16 w-auto"
                   />
                 </div>
                 
