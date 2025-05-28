@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, ChevronDown, ExternalLink, Search, Lightbulb, Target, Database, Brain } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ChatSidebar } from "@/components/ChatSidebar";
 
 interface Message {
@@ -202,11 +202,12 @@ const Index = () => {
           <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
             <div className="max-w-4xl mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-8">
+                <div className="flex items-center space-x-4">
+                  <SidebarTrigger className="hover:bg-gray-100 md:hidden" />
                   <img 
                     src="/lovable-uploads/logonew.png" 
                     alt="Logo" 
-                    className="h-16 w-auto"
+                    className="h-8 w-auto"
                   />
                 </div>
                 

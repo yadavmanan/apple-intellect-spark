@@ -12,7 +12,7 @@ import {
   SidebarGroupContent,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { MessageSquare, History, Plus, MoreHorizontal } from 'lucide-react';
+import { MessageSquare, History, Plus, MoreHorizontal, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -53,15 +53,17 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId, chatSessio
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className="border-b border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
-          <SidebarTrigger className="hover:bg-gray-100" />
+          <Button 
+            onClick={onNewChat}
+            className="flex-1 bg-black hover:bg-gray-800 text-white rounded-xl transition-all duration-300 hover:scale-105 mr-2"
+          >
+            <Plus size={16} className="mr-2" />
+            New Chat
+          </Button>
+          <SidebarTrigger className="hover:bg-gray-100 p-2 rounded-md">
+            <X size={16} />
+          </SidebarTrigger>
         </div>
-        <Button 
-          onClick={onNewChat}
-          className="w-full bg-black hover:bg-gray-800 text-white rounded-xl transition-all duration-300 hover:scale-105"
-        >
-          <Plus size={16} className="mr-2" />
-          New Chat
-        </Button>
       </SidebarHeader>
       
       <SidebarContent className="p-4">
