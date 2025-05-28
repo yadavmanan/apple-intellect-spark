@@ -91,7 +91,7 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId }: ChatSide
               {chatSessions.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
                   <div
-                    className={`relative p-4 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
+                    className={`relative p-4 pr-12 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
                       currentChatId === chat.id 
                         ? 'bg-gray-50 border-gray-300' 
                         : 'bg-white border-gray-200 hover:bg-gray-50'

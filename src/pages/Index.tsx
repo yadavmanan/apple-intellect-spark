@@ -145,16 +145,13 @@ const Index = () => {
           <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
             <div className="max-w-4xl mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-4">
                   <SidebarTrigger className="hover:bg-gray-100" />
                   <img 
-                    src="/lovable-uploads/8960b70e-ca17-4aae-85a4-23f5e6751b1c.png" 
-                    alt="Apple" 
-                    className="h-7 w-auto"
+                    src="/lovable-uploads/780c5241-12cf-4902-a471-ab43735b2e6c.png" 
+                    alt="Siemens Healthineers" 
+                    className="h-12 w-auto"
                   />
-                  <div>
-                    <h1 className="text-lg font-medium text-black">Assistant</h1>
-                  </div>
                 </div>
                 
                 {/* Controls */}
@@ -202,8 +199,8 @@ const Index = () => {
           </header>
 
           {/* Chat Container */}
-          <div className="max-w-4xl mx-auto px-6 py-8">
-            <div className="space-y-6">
+          <div className="max-w-4xl mx-auto px-6 py-8 min-h-[calc(100vh-140px)] flex flex-col">
+            <div className="flex-1 space-y-6">
               {messages.length === 0 && (
                 <div className="text-center py-16">
                   <div className="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center transform rotate-3">
@@ -337,14 +334,14 @@ const Index = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Form */}
-            <div className="sticky bottom-6 mt-8">
+            {/* Fixed Input Form */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
               <form onSubmit={handleSubmit} className="relative">
                 <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
                   <Input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask me anything about Apple documentation..."
+                    placeholder="Ask me anything about documentation..."
                     className="border-0 text-base py-6 px-6 focus-visible:ring-0 focus-visible:ring-offset-0"
                     disabled={isLoading}
                   />
