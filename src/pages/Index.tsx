@@ -149,7 +149,7 @@ const Index = () => {
                 <div className="flex items-center space-x-4">
                   <SidebarTrigger className="hover:bg-gray-100" />
                   <img 
-                    src="/lovable-uploads/780c5241-12cf-4902-a471-ab43735b2e6c.png" 
+                    src="/lovable-uploads/logonew.png" 
                     alt="Siemens Healthineers" 
                     className="h-12 w-auto"
                   />
