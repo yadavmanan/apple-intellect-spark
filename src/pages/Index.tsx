@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, ChevronDown, ExternalLink, Search, Lightbulb, Target, Database, Brain } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { ChatSidebar } from "@/components/ChatSidebar";
 
 interface Message {
@@ -203,7 +204,7 @@ const Index = () => {
             <div className="max-w-4xl mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <SidebarTrigger className="hover:bg-gray-100 md:hidden" />
+                  <SidebarTrigger className="hover:bg-gray-100" />
                   <img 
                     src="/lovable-uploads/logonew.png" 
                     alt="Logo" 
