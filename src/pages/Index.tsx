@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,41 +34,33 @@ interface ChatSession {
   timestamp: Date;
 }
 
-const MainContent = () => {
+const MainContent = ({ 
+  messages, 
+  setMessages, 
+  inputValue, 
+  setInputValue, 
+  isLoading, 
+  setIsLoading, 
+  currentChatId, 
+  chatSessions, 
+  setChatSessions, 
+  setCurrentChatId 
+}: {
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  inputValue: string;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  currentChatId: string;
+  chatSessions: ChatSession[];
+  setChatSessions: React.Dispatch<React.SetStateAction<ChatSession[]>>;
+  setCurrentChatId: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   const { state } = useSidebar();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [conversationStyle, setConversationStyle] = useState<'creative' | 'balanced' | 'precise'>('balanced');
   const [searchType, setSearchType] = useState<'deep' | 'external'>('deep');
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
-  const [currentChatId, setCurrentChatId] = useState<string>('1');
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([
-    {
-      id: '1',
-      title: 'What is Section 2?',
-      lastMessage: 'Section 2 refers to the fundamental architecture patterns...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30)
-    },
-    {
-      id: '2', 
-      title: 'iOS Development Guidelines',
-      lastMessage: 'The iOS Human Interface Guidelines provide...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
-    },
-    {
-      id: '3',
-      title: 'SwiftUI Best Practices',
-      lastMessage: 'SwiftUI provides a declarative Swift syntax...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
-    },
-    {
-      id: '4',
-      title: 'Security Standards',
-      lastMessage: 'Apple\'s security framework ensures...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48)
-    }
-  ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -188,25 +181,6 @@ const MainContent = () => {
       }
       return newSet;
     });
-  };
-
-  const handleNewChat = () => {
-    setMessages([]);
-    setCurrentChatId('');
-  };
-
-  const handleSelectChat = (chatId: string) => {
-    setCurrentChatId(chatId);
-    // In a real app, you'd load the messages for this chat
-    setMessages([]);
-  };
-
-  const handleDeleteChat = (chatId: string) => {
-    setChatSessions(prev => prev.filter(session => session.id !== chatId));
-    if (currentChatId === chatId) {
-      setCurrentChatId('');
-      setMessages([]);
-    }
   };
 
   const conversationStyles = [
@@ -466,10 +440,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationStyle, setConversationStyle] = useState<'creative' | 'balanced' | 'precise'>('balanced');
-  const [searchType, setSearchType] = useState<'deep' | 'external'>('deep');
-  const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
-  const [currentChatId, setCurrentChatId] = useState<string>('1');
+  const [currentChatId, setCurrentChatId] = useState<string>('');
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([
     {
       id: '1',
@@ -496,99 +467,11 @@ const Index = () => {
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48)
     }
   ]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const mockSources: Source[] = [
-    {
-      id: '1',
-      title: 'Apple Developer Documentation - Section 2',
-      url: 'https://developer.apple.com/documentation/section2',
-      snippet: 'Section 2 covers the fundamental architecture patterns and design principles for building robust iOS applications...',
-      relevance: 0.95
-    },
-    {
-      id: '2',
-      title: 'iOS Human Interface Guidelines',
-      url: 'https://developer.apple.com/design/human-interface-guidelines/',
-      snippet: 'This section outlines the core design principles that make iOS apps intuitive and user-friendly...',
-      relevance: 0.87
-    },
-    {
-      id: '3',
-      title: 'SwiftUI Framework Overview',
-      url: 'https://developer.apple.com/xcode/swiftui/',
-      snippet: 'SwiftUI provides a declarative Swift syntax for building user interfaces across all Apple platforms...',
-      relevance: 0.82
-    }
-  ];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    
-    // If this is the first message in a new chat, create a new chat session
-    if (messages.length === 0) {
-      const newChatId = Date.now().toString();
-      const newChatSession: ChatSession = {
-        id: newChatId,
-        title: inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue,
-        lastMessage: inputValue,
-        timestamp: new Date()
-      };
-      setChatSessions(prev => [newChatSession, ...prev]);
-      setCurrentChatId(newChatId);
-    }
-    
-    setInputValue('');
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: `Section 2 refers to the fundamental architecture patterns in Apple's development framework. It covers key concepts including MVC (Model-View-Controller) patterns, delegation protocols, and data flow management in iOS applications. This section is essential for understanding how to structure scalable and maintainable iOS apps that follow Apple's recommended practices.`,
-        sources: mockSources,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  const toggleSourceExpansion = (sourceId: string) => {
-    setExpandedSources(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(sourceId)) {
-        newSet.delete(sourceId);
-      } else {
-        newSet.add(sourceId);
-      }
-      return newSet;
-    });
-  };
 
   const handleNewChat = () => {
     setMessages([]);
     setCurrentChatId('');
+    setInputValue('');
   };
 
   const handleSelectChat = (chatId: string) => {
@@ -605,17 +488,6 @@ const Index = () => {
     }
   };
 
-  const conversationStyles = [
-    { id: 'creative', label: 'Creative', icon: Lightbulb, description: 'Imaginative responses' },
-    { id: 'balanced', label: 'Balanced', icon: Target, description: 'Balanced approach' },
-    { id: 'precise', label: 'Precise', icon: Search, description: 'Fact-focused answers' }
-  ];
-
-  const searchTypes = [
-    { id: 'deep', label: 'Deep Research', icon: Brain, description: 'In-depth analysis' },
-    { id: 'external', label: 'External Database', icon: Database, description: 'Curated sources' }
-  ];
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-white">
@@ -627,7 +499,18 @@ const Index = () => {
           onDeleteChat={handleDeleteChat}
         />
         
-        <MainContent />
+        <MainContent 
+          messages={messages}
+          setMessages={setMessages}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          currentChatId={currentChatId}
+          chatSessions={chatSessions}
+          setChatSessions={setChatSessions}
+          setCurrentChatId={setCurrentChatId}
+        />
       </div>
     </SidebarProvider>
   );
