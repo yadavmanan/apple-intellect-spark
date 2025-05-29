@@ -417,16 +417,6 @@ const MainContent = ({
                   <Send size={16} />
                 </Button>
               </div>
-              
-              <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-gray-500">
-                <span>Mode: {conversationStyle}</span>
-                {searchType && (
-                  <>
-                    <span>•</span>
-                    <span>Search: {searchType === 'deep' ? 'Deep Research' : 'External Database'}</span>
-                  </>
-                )}
-              </div>
             </form>
           </div>
         </div>
