@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +58,7 @@ const MainContent = ({
 }) => {
   const { state } = useSidebar();
   const [conversationStyle, setConversationStyle] = useState<'creative' | 'balanced' | 'precise'>('balanced');
-  const [searchType, setSearchType] = useState<'deep' | 'external'>('deep');
+  const [searchType, setSearchType] = useState<'deep' | 'external' | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -108,12 +107,10 @@ const MainContent = ({
           : msg
       ));
       
-      // Vary the delay between words for more natural streaming
-      const delay = Math.random() * 50 + 30; // 30-80ms delay
+      const delay = Math.random() * 50 + 30;
       await new Promise(resolve => setTimeout(resolve, delay));
     }
     
-    // Add sources after streaming is complete
     setTimeout(() => {
       setMessages(prev => prev.map(msg => 
         msg.id === messageId 
@@ -136,7 +133,6 @@ const MainContent = ({
 
     setMessages(prev => [...prev, userMessage]);
     
-    // If this is the first message in a new chat, create a new chat session
     if (messages.length === 0) {
       const newChatId = Date.now().toString();
       const newChatSession: ChatSession = {
@@ -152,7 +148,6 @@ const MainContent = ({
     setInputValue('');
     setIsLoading(true);
 
-    // Create assistant message with empty content initially
     const assistantMessageId = (Date.now() + 1).toString();
     const assistantMessage: Message = {
       id: assistantMessageId,
@@ -165,7 +160,6 @@ const MainContent = ({
     setMessages(prev => [...prev, assistantMessage]);
     setIsLoading(false);
 
-    // Start streaming the response
     const fullResponse = `Section 2 refers to the fundamental architecture patterns in Apple's development framework. It covers key concepts including MVC (Model-View-Controller) patterns, delegation protocols, and data flow management in iOS applications. This section is essential for understanding how to structure scalable and maintainable iOS apps that follow Apple's recommended practices.`;
     
     await streamText(fullResponse, assistantMessageId);
@@ -200,6 +194,7 @@ const MainContent = ({
       <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
+            {/* Left side - Logo */}
             <div className="flex items-center space-x-4">
               {state === "collapsed" && (
                 <SidebarTrigger className="hover:bg-gray-100" />
@@ -211,7 +206,7 @@ const MainContent = ({
               />
             </div>
             
-            {/* Controls */}
+            {/* Right side - Controls */}
             <div className="flex items-center space-x-4">
               {/* Conversation Style */}
               <div className="flex bg-gray-100 rounded-lg p-1">
@@ -232,12 +227,12 @@ const MainContent = ({
                 ))}
               </div>
 
-              {/* Search Type */}
+              {/* Search Type - Optional */}
               <div className="flex bg-gray-100 rounded-lg p-1">
                 {searchTypes.map((type) => (
                   <button
                     key={type.id}
-                    onClick={() => setSearchType(type.id as any)}
+                    onClick={() => setSearchType(searchType === type.id ? null : type.id as any)}
                     className={cn(
                       "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
                       searchType === type.id
@@ -256,7 +251,7 @@ const MainContent = ({
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-[calc(100vh-100px)]">
+      <div className="flex-1 flex flex-col h-[calc(100vh-180px)]">
         {/* Messages Container */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8">
@@ -402,7 +397,7 @@ const MainContent = ({
         </div>
 
         {/* Fixed Input Form */}
-        <div className="border-t border-gray-200 bg-white">
+        <div className="border-t border-gray-200 bg-white sticky bottom-0 z-40">
           <div className="max-w-4xl mx-auto px-6 py-6">
             <form onSubmit={handleSubmit} className="relative">
               <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
@@ -425,8 +420,12 @@ const MainContent = ({
               
               <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-gray-500">
                 <span>Mode: {conversationStyle}</span>
-                <span>•</span>
-                <span>Search: {searchType === 'deep' ? 'Deep Research' : 'External Database'}</span>
+                {searchType && (
+                  <>
+                    <span>•</span>
+                    <span>Search: {searchType === 'deep' ? 'Deep Research' : 'External Database'}</span>
+                  </>
+                )}
               </div>
             </form>
           </div>
@@ -476,7 +475,6 @@ const Index = () => {
 
   const handleSelectChat = (chatId: string) => {
     setCurrentChatId(chatId);
-    // In a real app, you'd load the messages for this chat
     setMessages([]);
   };
 
