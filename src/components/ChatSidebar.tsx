@@ -73,32 +73,27 @@ export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId, chatSessio
             Recent Chats
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-3">
+            <SidebarMenu className="space-y-2">
               {chatSessions.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
                   <div
-                    className={`relative p-4 pr-12 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
+                    className={`relative p-3 pr-10 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
                       currentChatId === chat.id 
                         ? 'bg-gray-50 border-gray-300' 
                         : 'bg-white border-gray-200 hover:bg-gray-50'
                     }`}
                     onClick={() => onSelectChat(chat.id)}
                   >
-                    <div className="flex items-start space-x-3">
-                      <MessageSquare size={16} className="text-gray-500 mt-1 flex-shrink-0" />
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-medium text-black truncate pr-2">
-                            {chat.title}
-                          </h4>
-                          <span className="text-xs text-gray-500 flex-shrink-0">
-                            {formatTime(chat.timestamp)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                          {chat.lastMessage}
-                        </p>
+                    <div className="flex items-center space-x-3">
+                      <MessageSquare size={16} className="text-gray-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium text-black truncate">
+                          {chat.title}
+                        </h4>
                       </div>
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        {formatTime(chat.timestamp)}
+                      </span>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
