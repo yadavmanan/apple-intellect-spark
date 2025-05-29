@@ -15,6 +15,7 @@ interface Message {
   content: string;
   sources?: Source[];
   timestamp: Date;
+  isStreaming?: boolean;
 }
 
 interface Source {
@@ -101,6 +102,34 @@ const MainContent = () => {
     }
   ];
 
+  const streamText = async (text: string, messageId: string) => {
+    const words = text.split(' ');
+    let currentText = '';
+    
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i > 0 ? ' ' : '') + words[i];
+      
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: currentText, isStreaming: i < words.length - 1 }
+          : msg
+      ));
+      
+      // Vary the delay between words for more natural streaming
+      const delay = Math.random() * 50 + 30; // 30-80ms delay
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    // Add sources after streaming is complete
+    setTimeout(() => {
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, sources: mockSources, isStreaming: false }
+          : msg
+      ));
+    }, 300);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
@@ -130,19 +159,23 @@ const MainContent = () => {
     setInputValue('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: `Section 2 refers to the fundamental architecture patterns in Apple's development framework. It covers key concepts including MVC (Model-View-Controller) patterns, delegation protocols, and data flow management in iOS applications. This section is essential for understanding how to structure scalable and maintainable iOS apps that follow Apple's recommended practices.`,
-        sources: mockSources,
-        timestamp: new Date()
-      };
+    // Create assistant message with empty content initially
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      type: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      isStreaming: true
+    };
 
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1500);
+    setMessages(prev => [...prev, assistantMessage]);
+    setIsLoading(false);
+
+    // Start streaming the response
+    const fullResponse = `Section 2 refers to the fundamental architecture patterns in Apple's development framework. It covers key concepts including MVC (Model-View-Controller) patterns, delegation protocols, and data flow management in iOS applications. This section is essential for understanding how to structure scalable and maintainable iOS apps that follow Apple's recommended practices.`;
+    
+    await streamText(fullResponse, assistantMessageId);
   };
 
   const toggleSourceExpansion = (sourceId: string) => {
@@ -299,9 +332,14 @@ const MainContent = () => {
                         : "bg-gray-50 border border-gray-200"
                     )}
                   >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className="text-sm leading-relaxed">
+                      {message.content}
+                      {message.isStreaming && (
+                        <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse" />
+                      )}
+                    </p>
                     
-                    {message.sources && (
+                    {message.sources && !message.isStreaming && (
                       <div className="mt-4 space-y-3">
                         <div className="flex items-center space-x-2 text-gray-600">
                           <ExternalLink size={16} />
