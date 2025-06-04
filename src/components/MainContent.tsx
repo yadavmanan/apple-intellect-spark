@@ -29,6 +29,7 @@ interface ChatSession {
   title: string;
   lastMessage: string;
   timestamp: Date;
+  messages: Message[];
 }
 
 interface MainContentProps {
@@ -42,6 +43,7 @@ interface MainContentProps {
   chatSessions: ChatSession[];
   setChatSessions: React.Dispatch<React.SetStateAction<ChatSession[]>>;
   setCurrentChatId: React.Dispatch<React.SetStateAction<string>>;
+  createNewChatSession: (firstMessage: string) => string;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
@@ -52,9 +54,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   isLoading,
   setIsLoading,
   currentChatId,
-  chatSessions,
-  setChatSessions,
-  setCurrentChatId
+  createNewChatSession
 }) => {
   const [conversationStyle, setConversationStyle] = useState<'creative' | 'balanced' | 'precise'>('balanced');
   const [searchType, setSearchType] = useState<'deep' | 'external' | null>(null);
@@ -131,16 +131,9 @@ export const MainContent: React.FC<MainContentProps> = ({
 
     setMessages(prev => [...prev, userMessage]);
     
+    // Create new chat session if this is the first message
     if (messages.length === 0) {
-      const newChatId = Date.now().toString();
-      const newChatSession: ChatSession = {
-        id: newChatId,
-        title: inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue,
-        lastMessage: inputValue,
-        timestamp: new Date()
-      };
-      setChatSessions(prev => [newChatSession, ...prev]);
-      setCurrentChatId(newChatId);
+      createNewChatSession(inputValue);
     }
     
     setInputValue('');
