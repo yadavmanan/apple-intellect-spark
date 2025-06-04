@@ -192,10 +192,10 @@ const MainContent = ({
     <SidebarInset className="flex-1">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto pr-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Left side - Logo */}
-            <div className="flex items-center space-x-4 pl-6">
+        <div className="w-full px-4 py-4">
+          <div className="flex items-center justify-between w-full">
+            {/* Left side - Logo (extreme left) */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
               {state === "collapsed" && (
                 <SidebarTrigger className="hover:bg-gray-100" />
               )}
@@ -206,8 +206,8 @@ const MainContent = ({
               />
             </div>
             
-            {/* Right side - Controls */}
-            <div className="flex items-center space-x-4">
+            {/* Right side - Controls (extreme right) */}
+            <div className="flex items-center space-x-3 flex-shrink-0">
               {/* Conversation Style */}
               <div className="flex bg-gray-100 rounded-lg p-1">
                 {conversationStyles.map((style) => (
@@ -215,14 +215,14 @@ const MainContent = ({
                     key={style.id}
                     onClick={() => setConversationStyle(style.id as any)}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                      "flex items-center space-x-1.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all duration-300",
                       conversationStyle === style.id
                         ? "bg-black text-white shadow-sm"
                         : "text-gray-600 hover:text-black"
                     )}
                   >
-                    <style.icon size={16} />
-                    <span>{style.label}</span>
+                    <style.icon size={14} />
+                    <span className="hidden sm:inline">{style.label}</span>
                   </button>
                 ))}
               </div>
@@ -234,14 +234,14 @@ const MainContent = ({
                     key={type.id}
                     onClick={() => setSearchType(searchType === type.id ? null : type.id as any)}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                      "flex items-center space-x-1.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all duration-300",
                       searchType === type.id
                         ? "bg-black text-white shadow-sm"
                         : "text-gray-600 hover:text-black"
                     )}
                   >
-                    <type.icon size={16} />
-                    <span>{type.label}</span>
+                    <type.icon size={14} />
+                    <span className="hidden sm:inline">{type.label}</span>
                   </button>
                 ))}
               </div>
