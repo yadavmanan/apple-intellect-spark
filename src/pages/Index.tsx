@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,8 +195,8 @@ const MainContent = ({
       <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between w-full">
-            {/* Left side - Logo (extreme left) */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
+            {/* Left side - Logo (with slight padding) */}
+            <div className="flex items-center space-x-2 flex-shrink-0 pl-2">
               {state === "collapsed" && (
                 <SidebarTrigger className="hover:bg-gray-100" />
               )}
