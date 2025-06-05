@@ -1,132 +1,119 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { 
   Sidebar, 
   SidebarContent, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuItem, 
+  SidebarHeader,
+  SidebarMenu,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarTrigger
+  SidebarMenuItem,
+  SidebarFooter
 } from "@/components/ui/sidebar";
-import { MessageSquare, History, Plus, MoreHorizontal, X } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Plus, MessageSquare, Trash2 } from 'lucide-react';
 
 interface ChatSession {
   id: string;
   title: string;
   lastMessage: string;
   timestamp: Date;
+  messages: any[];
 }
 
 interface ChatSidebarProps {
   onNewChat: () => void;
   onSelectChat: (chatId: string) => void;
-  currentChatId?: string;
+  currentChatId: string;
   chatSessions: ChatSession[];
   onDeleteChat: (chatId: string) => void;
 }
 
-export const ChatSidebar = ({ onNewChat, onSelectChat, currentChatId, chatSessions, onDeleteChat }: ChatSidebarProps) => {
-  const formatTime = (date: Date) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({
+  onNewChat,
+  onSelectChat,
+  currentChatId,
+  chatSessions,
+  onDeleteChat
+}) => {
+  const formatDate = (date: Date) => {
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    return date.toLocaleDateString();
   };
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white">
-      <SidebarHeader className="border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <Button 
-            onClick={onNewChat}
-            className="flex-1 bg-black hover:bg-gray-800 text-white rounded-xl transition-all duration-300 hover:scale-105 mr-2"
-          >
-            <Plus size={16} className="mr-2" />
-            New Chat
-          </Button>
-          <SidebarTrigger className="hover:bg-gray-100 p-2 rounded-md">
-            <X size={16} />
-          </SidebarTrigger>
-        </div>
+    <Sidebar className="border-r border-gray-200">
+      <SidebarHeader className="p-4 border-b border-gray-200">
+        <Button 
+          onClick={onNewChat}
+          className="w-full bg-black hover:bg-gray-800 text-white"
+        >
+          <Plus size={16} className="mr-2" />
+          New Chat
+        </Button>
       </SidebarHeader>
-      
-      <SidebarContent className="p-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-600 text-xs font-medium mb-4 px-2 flex items-center">
-            <History size={14} className="mr-2" />
-            Recent Chats
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
-              {chatSessions.map((chat) => (
-                <SidebarMenuItem key={chat.id}>
-                  <div
-                    className={`relative p-3 pr-10 rounded-lg border transition-all duration-300 hover:shadow-md cursor-pointer group ${
-                      currentChatId === chat.id 
-                        ? 'bg-gray-50 border-gray-300' 
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
+
+      <SidebarContent>
+        <ScrollArea className="flex-1">
+          <div className="p-2">
+            <SidebarMenu>
+              {chatSessions.map((session) => (
+                <SidebarMenuItem key={session.id}>
+                  <SidebarMenuButton
+                    onClick={() => onSelectChat(session.id)}
+                    className={`w-full justify-start p-3 mb-1 rounded-lg transition-colors ${
+                      currentChatId === session.id 
+                        ? 'bg-gray-100 border border-gray-300' 
+                        : 'hover:bg-gray-50'
                     }`}
-                    onClick={() => onSelectChat(chat.id)}
                   >
-                    <div className="flex items-center space-x-3">
-                      <MessageSquare size={16} className="text-gray-500 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-black truncate">
-                          {chat.title}
-                        </h4>
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
+                        <MessageSquare size={16} className="text-gray-500 mt-1 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {session.title}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {session.lastMessage}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {formatDate(session.timestamp)}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-500 flex-shrink-0">
-                        {formatTime(chat.timestamp)}
-                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteChat(session.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 h-auto hover:bg-gray-200 rounded-md"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          <MoreHorizontal size={14} className="text-gray-500" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteChat(chat.id);
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          Delete chat
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          </div>
+        </ScrollArea>
       </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t border-gray-200">
+        <div className="text-xs text-gray-500 text-center">
+          Chat Assistant v1.0
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
