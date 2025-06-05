@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from 'lucide-react';
@@ -41,6 +40,7 @@ interface Message {
   type: 'user' | 'assistant';
   content: string;
   sources?: Source[];
+  documents?: Document[];
   timestamp: Date;
   isStreaming?: boolean;
 }
@@ -113,7 +113,7 @@ export const MainContent: React.FC<MainContentProps> = ({
     return history;
   };
 
-  const streamText = async (text: string, messageId: string, sources?: Source[]) => {
+  const streamText = async (text: string, messageId: string, sources?: Source[], documents?: Document[]) => {
     const words = text.split(' ');
     let currentText = '';
     
@@ -133,7 +133,7 @@ export const MainContent: React.FC<MainContentProps> = ({
     setTimeout(() => {
       setMessages(prev => prev.map(msg => 
         msg.id === messageId 
-          ? { ...msg, sources: sources, isStreaming: false }
+          ? { ...msg, sources: sources, documents: documents, isStreaming: false }
           : msg
       ));
     }, 300);
@@ -221,7 +221,7 @@ export const MainContent: React.FC<MainContentProps> = ({
       const sources = convertDocsToSources(apiResponse.docs);
       
       setIsLoading(false);
-      await streamText(apiResponse.answer, assistantMessageId, sources);
+      await streamText(apiResponse.answer, assistantMessageId, sources, apiResponse.docs);
     } catch (error) {
       console.error('Error calling API:', error);
       setIsLoading(false);
