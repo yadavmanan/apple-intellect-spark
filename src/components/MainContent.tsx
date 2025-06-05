@@ -7,13 +7,25 @@ import { ConversationControls } from './ConversationControls';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 
-interface Message {
-  id: string;
-  type: 'user' | 'assistant';
-  content: string;
-  sources?: Source[];
-  timestamp: Date;
-  isStreaming?: boolean;
+interface Document {
+  id: string | null;
+  metadata: {
+    _data_point_file_path: string;
+    _data_point_fqn: string;
+    _data_point_hash: string;
+    _data_source_fqn: string;
+    document_name: string;
+    document_title: string;
+    _id: string;
+    _collection_name: string;
+  };
+  page_content: string;
+  type: string;
+}
+
+interface ApiResponse {
+  answer: string;
+  docs: Document[];
 }
 
 interface Source {
@@ -22,6 +34,15 @@ interface Source {
   url: string;
   snippet: string;
   relevance: number;
+}
+
+interface Message {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  sources?: Source[];
+  timestamp: Date;
+  isStreaming?: boolean;
 }
 
 interface ChatSession {
@@ -68,31 +89,17 @@ export const MainContent: React.FC<MainContentProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  const mockSources: Source[] = [
-    {
-      id: '1',
-      title: 'Apple Developer Documentation - Section 2',
-      url: 'https://developer.apple.com/documentation/section2',
-      snippet: 'Section 2 covers the fundamental architecture patterns and design principles for building robust iOS applications...',
-      relevance: 0.95
-    },
-    {
-      id: '2',
-      title: 'iOS Human Interface Guidelines',
-      url: 'https://developer.apple.com/design/human-interface-guidelines/',
-      snippet: 'This section outlines the core design principles that make iOS apps intuitive and user-friendly...',
-      relevance: 0.87
-    },
-    {
-      id: '3',
-      title: 'SwiftUI Framework Overview',
-      url: 'https://developer.apple.com/xcode/swiftui/',
-      snippet: 'SwiftUI provides a declarative Swift syntax for building user interfaces across all Apple platforms...',
-      relevance: 0.82
-    }
-  ];
+  const convertDocsToSources = (docs: Document[]): Source[] => {
+    return docs.map((doc, index) => ({
+      id: doc.metadata._id || `doc-${index}`,
+      title: doc.metadata.document_title || doc.metadata.document_name,
+      url: `#${doc.metadata.document_name}`, // You can modify this to actual URLs if available
+      snippet: doc.page_content.substring(0, 200) + (doc.page_content.length > 200 ? '...' : ''),
+      relevance: 0.9 - (index * 0.1) // Mock relevance based on order
+    }));
+  };
 
-  const streamText = async (text: string, messageId: string) => {
+  const streamText = async (text: string, messageId: string, sources?: Source[]) => {
     const words = text.split(' ');
     let currentText = '';
     
@@ -112,10 +119,26 @@ export const MainContent: React.FC<MainContentProps> = ({
     setTimeout(() => {
       setMessages(prev => prev.map(msg => 
         msg.id === messageId 
-          ? { ...msg, sources: mockSources, isStreaming: false }
+          ? { ...msg, sources: sources, isStreaming: false }
           : msg
       ));
     }, 300);
+  };
+
+  const callApi = async (query: string): Promise<ApiResponse> => {
+    const response = await fetch('http://127.0.0.1:8000/retrievers/oma-rag/answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch response from API');
+    }
+
+    return response.json();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,6 +159,7 @@ export const MainContent: React.FC<MainContentProps> = ({
       createNewChatSession(inputValue);
     }
     
+    const currentQuery = inputValue;
     setInputValue('');
     setIsLoading(true);
 
@@ -149,11 +173,20 @@ export const MainContent: React.FC<MainContentProps> = ({
     };
 
     setMessages(prev => [...prev, assistantMessage]);
-    setIsLoading(false);
 
-    const fullResponse = `Section 2 refers to the fundamental architecture patterns in Apple's development framework. It covers key concepts including MVC (Model-View-Controller) patterns, delegation protocols, and data flow management in iOS applications. This section is essential for understanding how to structure scalable and maintainable iOS apps that follow Apple's recommended practices.`;
-    
-    await streamText(fullResponse, assistantMessageId);
+    try {
+      const apiResponse = await callApi(currentQuery);
+      const sources = convertDocsToSources(apiResponse.docs);
+      
+      setIsLoading(false);
+      await streamText(apiResponse.answer, assistantMessageId, sources);
+    } catch (error) {
+      console.error('Error calling API:', error);
+      setIsLoading(false);
+      
+      const errorMessage = "I'm sorry, I encountered an error while processing your request. Please try again.";
+      await streamText(errorMessage, assistantMessageId);
+    }
   };
 
   return (

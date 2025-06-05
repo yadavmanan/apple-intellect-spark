@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from 'lucide-react';
@@ -17,12 +17,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSubmit,
   isLoading
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Auto-focus the input when component mounts
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="border-t border-gray-200 bg-white sticky bottom-0 z-40">
       <div className="max-w-4xl mx-auto px-6 py-6">
         <form onSubmit={onSubmit} className="relative">
           <div className="bg-white border border-gray-300 rounded-2xl shadow-lg overflow-hidden backdrop-blur-sm">
             <Input
+              ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask me anything about documentation..."
