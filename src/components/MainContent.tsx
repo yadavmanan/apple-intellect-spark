@@ -161,7 +161,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           k: 6
         }
       },
-      stream: false
+      stream: true
     };
 
     console.log('Sending API request:', JSON.stringify(requestBody, null, 2));
