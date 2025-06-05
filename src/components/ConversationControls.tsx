@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Brain, Zap, Target, Globe, Database } from 'lucide-react';
+import { Lightbulb, Target, Search, Brain, Database } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 interface ConversationControlsProps {
   conversationStyle: 'creative' | 'balanced' | 'precise';
@@ -18,106 +17,77 @@ export const ConversationControls: React.FC<ConversationControlsProps> = ({
   searchType,
   setSearchType
 }) => {
-  const styleOptions = [
-    { 
-      value: 'creative' as const, 
-      label: 'Creative', 
-      icon: Brain,
-      description: 'More imaginative responses'
-    },
-    { 
-      value: 'balanced' as const, 
-      label: 'Balanced', 
-      icon: Zap,
-      description: 'Balanced approach'
-    },
-    { 
-      value: 'precise' as const, 
-      label: 'Precise', 
-      icon: Target,
-      description: 'Focused and accurate'
-    }
+  const { state } = useSidebar();
+
+  const conversationStyles = [
+    { id: 'creative', label: 'Creative', icon: Lightbulb, description: 'Imaginative responses' },
+    { id: 'balanced', label: 'Balanced', icon: Target, description: 'Balanced approach' },
+    { id: 'precise', label: 'Precise', icon: Search, description: 'Fact-focused answers' }
   ];
 
-  const searchOptions = [
-    { 
-      value: 'deep' as const, 
-      label: 'Deep Search', 
-      icon: Database,
-      description: 'Search internal knowledge base'
-    },
-    { 
-      value: 'external' as const, 
-      label: 'External Search', 
-      icon: Globe,
-      description: 'Include external sources'
-    }
+  const searchTypes = [
+    { id: 'deep', label: 'Deep Research', icon: Brain, description: 'In-depth analysis' },
+    { id: 'external', label: 'External Database', icon: Database, description: 'Curated sources' }
   ];
 
   return (
-    <div className="border-b border-gray-200 bg-white sticky top-0 z-30">
-      <div className="max-w-4xl mx-auto px-6 py-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
-          {/* Conversation Style */}
-          <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-700">Style:</span>
-            <div className="flex space-x-2">
-              {styleOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.value}
-                    variant={conversationStyle === option.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setConversationStyle(option.value)}
-                    className={`transition-all duration-200 ${
-                      conversationStyle === option.value 
-                        ? 'bg-black text-white hover:bg-gray-800' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon size={14} className="mr-1" />
-                    {option.label}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-
-          <Separator orientation="vertical" className="hidden sm:block h-6" />
-
-          {/* Search Type */}
-          <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-700">Search:</span>
-            <div className="flex space-x-2">
-              {searchOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.value}
-                    variant={searchType === option.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSearchType(searchType === option.value ? null : option.value)}
-                    className={`transition-all duration-200 ${
-                      searchType === option.value 
-                        ? 'bg-black text-white hover:bg-gray-800' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon size={14} className="mr-1" />
-                    {option.label}
-                  </Button>
-                );
-              })}
-            </div>
-            {searchType && (
-              <Badge variant="secondary" className="ml-2">
-                {searchOptions.find(opt => opt.value === searchType)?.description}
-              </Badge>
+    <header className="border-b border-gray-200 bg-white/95 backdrop-blur-md sticky top-0 z-50">
+      <div className="w-full px-4 py-4">
+        <div className="flex items-center justify-between w-full">
+          {/* Left side - Logo (with slight padding) */}
+          <div className="flex items-center space-x-2 flex-shrink-0 pl-2">
+            {state === "collapsed" && (
+              <SidebarTrigger className="hover:bg-gray-100" />
             )}
+            <img 
+              src="/lovable-uploads/logonew.png" 
+              alt="Logo" 
+              className="h-6 w-auto"
+            />
+          </div>
+          
+          {/* Right side - Controls (extreme right) */}
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            {/* Conversation Style */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              {conversationStyles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => setConversationStyle(style.id as any)}
+                  className={cn(
+                    "flex items-center space-x-1.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                    conversationStyle === style.id
+                      ? "bg-black text-white shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  )}
+                >
+                  <style.icon size={14} />
+                  <span className="hidden sm:inline">{style.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search Type - Optional */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              {searchTypes.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => setSearchType(searchType === type.id ? null : type.id as any)}
+                  className={cn(
+                    "flex items-center space-x-1.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                    searchType === type.id
+                      ? "bg-black text-white shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  )}
+                >
+                  <type.icon size={14} />
+                  <span className="hidden sm:inline">{type.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
