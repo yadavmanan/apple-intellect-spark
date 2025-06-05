@@ -141,7 +141,7 @@ export const MainContent: React.FC<MainContentProps> = ({
 
   const callApi = async (query: string, chatHistory: string[]): Promise<ApiResponse> => {
     const requestBody = {
-      collection_name: "qswitest",
+      collection_name: "cybers-collection",
       chat_history: chatHistory,
       query: query,
       model_configuration: {
