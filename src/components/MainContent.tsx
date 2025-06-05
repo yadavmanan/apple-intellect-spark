@@ -93,10 +93,24 @@ export const MainContent: React.FC<MainContentProps> = ({
     return docs.map((doc, index) => ({
       id: doc.metadata._id || `doc-${index}`,
       title: doc.metadata.document_title || doc.metadata.document_name,
-      url: `#${doc.metadata.document_name}`, // You can modify this to actual URLs if available
+      url: `#${doc.metadata.document_name}`,
       snippet: doc.page_content.substring(0, 200) + (doc.page_content.length > 200 ? '...' : ''),
-      relevance: 0.9 - (index * 0.1) // Mock relevance based on order
+      relevance: 0.9 - (index * 0.1)
     }));
+  };
+
+  const buildChatHistory = (messages: Message[]): string[] => {
+    const history: string[] = ["Assistant: Hey There! How can I help you?"];
+    
+    messages.forEach((message) => {
+      if (message.type === 'user') {
+        history.push(`User: ${message.content}`);
+      } else if (message.type === 'assistant') {
+        history.push(`Assistant: ${message.content}`);
+      }
+    });
+    
+    return history;
   };
 
   const streamText = async (text: string, messageId: string, sources?: Source[]) => {
@@ -125,17 +139,45 @@ export const MainContent: React.FC<MainContentProps> = ({
     }, 300);
   };
 
-  const callApi = async (query: string): Promise<ApiResponse> => {
+  const callApi = async (query: string, chatHistory: string[]): Promise<ApiResponse> => {
+    const requestBody = {
+      collection_name: "qswitest",
+      chat_history: chatHistory,
+      query: query,
+      model_configuration: {
+        name: "truefoundry/siemens-azureopenai/gpt-4o",
+        parameters: {
+          temperature: 0.1,
+          max_tokens: 1024
+        }
+      },
+      prompt_template: "\nYou are a helpful AI assistant. Utilize the provided context to generate an accurate and detailed answer to the user's question.\n\n- **If the user's question explicitly requests a summary**, directly generate a concise and informative summary based on the context.\n- **If the context contains relevant information**, extract and synthesize this information to construct a comprehensive response to the user's question.\n- **If the context lacks pertinent information**, respond with: \"No information is available in the given context for the query.\"\n- **Do not fabricate answers**. Rely solely on the information present in the provided context.\n\n**Response Structure**:\n1. **Answer**: Provide a direct and clear answer to the user's question.\n2. **Supporting Information**: Include relevant details from the context that support the answer.\n\nContext:\n{context}\nQuestion: {question}\n",
+      retriever_name: "contextual-compression",
+      retriever_config: {
+        compressor_model_name: "local-infinity/mixedbread-ai/mxbai-rerank-xsmall-v1",
+        top_k: 3,
+        search_type: "similarity",
+        search_kwargs: {
+          k: 6
+        }
+      },
+      stream: false
+    };
+
+    console.log('Sending API request:', JSON.stringify(requestBody, null, 2));
+
     const response = await fetch('http://127.0.0.1:8000/retrievers/oma-rag/answer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch response from API');
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to fetch response from API: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
@@ -154,7 +196,6 @@ export const MainContent: React.FC<MainContentProps> = ({
 
     setMessages(prev => [...prev, userMessage]);
     
-    // Create new chat session if this is the first message
     if (messages.length === 0) {
       createNewChatSession(inputValue);
     }
@@ -175,7 +216,8 @@ export const MainContent: React.FC<MainContentProps> = ({
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      const apiResponse = await callApi(currentQuery);
+      const chatHistory = buildChatHistory([...messages, userMessage]);
+      const apiResponse = await callApi(currentQuery, chatHistory);
       const sources = convertDocsToSources(apiResponse.docs);
       
       setIsLoading(false);
@@ -198,9 +240,7 @@ export const MainContent: React.FC<MainContentProps> = ({
         setSearchType={setSearchType}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-[calc(100vh-180px)]">
-        {/* Messages Container */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8">
             <div className="space-y-6">
