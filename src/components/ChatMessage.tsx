@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, FileText, Calendar, Hash, Database } from 'lucide-react';
+import { ChevronDown, FileText, Calendar, Hash, Database, Search, Brain, MessageSquare } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface Source {
@@ -50,6 +50,30 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const [expandedDocuments, setExpandedDocuments] = useState<Set<string>>(new Set());
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const searchSteps = [
+    { icon: Search, text: "Searching knowledge base..." },
+    { icon: Brain, text: "Analyzing relevant documents..." },
+    { icon: MessageSquare, text: "Generating response..." }
+  ];
+
+  useEffect(() => {
+    if (message.isStreaming && message.type === 'assistant' && message.content === '') {
+      const stepInterval = setInterval(() => {
+        setCurrentStep(prev => {
+          if (prev < searchSteps.length - 1) {
+            return prev + 1;
+          }
+          return prev;
+        });
+      }, 1500);
+
+      return () => clearInterval(stepInterval);
+    } else {
+      setCurrentStep(0);
+    }
+  }, [message.isStreaming, message.content]);
 
   const toggleDocumentExpansion = (docId: string) => {
     setExpandedDocuments(prev => {
@@ -75,6 +99,27 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
   };
 
+  // Show loading steps if message is streaming and has no content yet
+  if (message.isStreaming && message.content === '' && message.type === 'assistant') {
+    return (
+      <div className="flex justify-start animate-fade-in">
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
+          <div className="flex items-center space-x-3">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <div className="flex items-center space-x-2">
+              {React.createElement(searchSteps[currentStep].icon, { size: 16, className: "text-blue-600" })}
+              <span className="text-sm text-gray-600">{searchSteps[currentStep].text}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -92,7 +137,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       >
         <div className="text-sm leading-relaxed whitespace-pre-wrap">
           {message.content}
-          {message.isStreaming && (
+          {message.isStreaming && message.content && (
             <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse" />
           )}
         </div>
