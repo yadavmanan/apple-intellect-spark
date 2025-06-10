@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -128,27 +127,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                           </Badge>
                         </div>
                         
-                        {doc.metadata.heading && (
-                          <div className="flex items-center space-x-1 mb-2">
-                            <Hash size={12} className="text-gray-500" />
-                            <span className="text-xs text-gray-600 font-medium">{doc.metadata.heading}</span>
-                          </div>
-                        )}
-                        
                         <div className="flex flex-wrap gap-2 mb-3">
                           {doc.metadata.document_name && (
                             <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
                               {doc.metadata.document_name}
-                            </Badge>
-                          )}
-                          {doc.metadata._collection_name && (
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                              {doc.metadata._collection_name}
-                            </Badge>
-                          )}
-                          {doc.metadata.chunk_index !== undefined && (
-                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                              Chunk {doc.metadata.chunk_index}
                             </Badge>
                           )}
                         </div>
