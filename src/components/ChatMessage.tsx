@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -205,38 +206,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                   {isExpanded && (
                     <CardContent className="pt-0 animate-fade-in">
                       <div className="border-t pt-4 space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                          {doc.metadata._data_point_hash && (
-                            <div className="flex items-center space-x-2">
-                              <Calendar size={12} className="text-gray-500" />
-                              <span className="text-gray-600">
-                                Last Modified: {formatDate(doc.metadata._data_point_hash.split(':')[1])}
-                              </span>
-                            </div>
-                          )}
-                          {doc.metadata._data_source_fqn && (
-                            <div className="flex items-center space-x-2">
-                              <Database size={12} className="text-gray-500" />
-                              <span className="text-gray-600 truncate">
-                                Source: {doc.metadata._data_source_fqn.split('::').pop()}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        
                         {doc.page_content.length > 200 && (
                           <div className="bg-gray-50 p-3 rounded-lg mt-3">
                             <h5 className="text-xs font-medium text-gray-700 mb-2">Full Content:</h5>
                             <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">
                               {doc.page_content}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {doc.metadata._data_point_file_path && (
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="text-xs text-gray-500">
-                              File Path: {doc.metadata._data_point_file_path.split('\\').pop()}
                             </p>
                           </div>
                         )}
